@@ -1,0 +1,125 @@
+<script> 
+	var poging = 0;
+	async function doen(){
+		var kluisje1 = Math.random();
+		var x = document.getElementById("invoerveld").value;
+		console.log(x);
+		
+		if (x=='Biem') {
+			document.getElementById("uitvoerveld").innerHTML ="Oh ja, dankjewel!";
+			const colors = ["red", "orange", "yellow"];
+        	const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+			const particles = [];
+			let rafID = null;
+			function createParticles(count, originX, originY) {
+				for (let i = 0; i < count; i++) {
+					const el = document.createElement('div');
+					const size = 6 + Math.random() * 18;
+					el.style.position = 'absolute';
+					el.style.left = '0';
+					el.style.top = '0';
+					el.style.width = size + 'px';
+					el.style.height = size + 'px';
+					el.style.borderRadius = '50%';
+					el.style.background = colors[Math.floor(Math.random() * colors.length)];
+					el.style.pointerEvents = 'none';
+					el.style.willChange = 'transform, opacity';
+					document.body.appendChild(el);
+
+					const angle = Math.random() * 2 * Math.PI;
+					const speed = 2 + Math.random() * 20;
+					particles.push({
+						el,
+						x: originX - size / 2,
+						y: originY - size / 2,
+						vx: Math.cos(angle) * speed,
+						vy: Math.sin(angle) * speed,
+						size,
+						life: 1
+					});
+				}
+
+			}
+			function animateParcticles() {
+				const gravity = 0.10;
+				const friction = 0.9995;
+				const bounce = -0.9;
+				function loop() {
+					rafID = requestAnimationFrame(loop);
+					for (let i = particles.length - 1; i >= 0; i--) {
+						const p = particles[i];
+						p.vy += gravity;
+						p.vx *= friction;
+						p.x += p.vx;
+						p.y += p.vy;
+
+						// Bounce off the bottom
+						if (p.y + p.size > window.innerHeight) {
+							p.y = window.innerHeight - p.size;
+							p.vy *= bounce;
+							p.vx *= 0.8;
+						}
+
+						// Bounce off the sides
+						if (p.x < 0) { p.x = 0; p.vx *= -0.6; }
+						if (p.x + p.size > window.innerWidth) { p.x = window.innerWidth - p.size; p.vx *= -0.6; }
+
+						// fade out slowly
+						p.life -= 0.0015;
+						p.el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
+						p.el.style.opacity = Math.max(0, p.life).toString();
+
+						if (p.life <= 0) {
+							p.el.remove();
+							particles.splice(i, 1);
+						}
+					}
+					// Stop the animation if there are no particles left
+					if (particles.length === 0) {
+						cancelAnimationFrame(rafID);
+						rafID = null;
+					}
+				}
+				if (!rafID) {
+					loop();
+				}
+			}
+			function stopParticles() {
+				if (rafID) {
+					cancelAnimationFrame(rafID);
+				}
+				while (particles.length) {
+					particles.pop().el.remove();
+				}
+				rafID = null;
+			}
+
+			//start explosion
+			const cx = window.innerWidth / 2;
+			const cy = window.innerHeight / 3;
+			createParticles(500, cx, cy);
+			animateParcticles();
+
+        	for (let i = 0; i < 50; i++) {
+            	document.body.style.backgroundColor = colors[i % colors.length];
+            	await sleep(200); // wait 100 ms between changes
+        	}
+
+			// clean up particles after some time
+			document.body.style.backgroundColor = 'white';
+
+		} else {
+			document.getElementById("uitvoerveld").innerHTML ="'" + x + "'? Nee, volgens mij iets anders...";
+			poging += 0.1;
+			if (kluisje1 + poging > 2) {
+				alert("Biem!");
+			}
+			console.log(poging+kluisje1);
+		}
+	}
+</script>
+
+<input id=invoerveld type=text>
+<input type=button value=klik onclick=doen()>
+<div id=uitvoerveld>Hoi! Hoe klinkt een explosie ook al weer?</div>
